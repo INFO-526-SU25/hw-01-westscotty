@@ -156,8 +156,27 @@ ggplot(marathon, aes(x = division, y = time, fill = division)) +
   ) +
   theme_minimal() +
   theme(legend.position = "none")
-
 ```
+
+### Part d
+
+```{r}
+ggplot(marathon, aes(x = year, y = time, color = division, shape = division)) +
+  geom_point(size = 3) +
+  geom_line() +
+  scale_color_manual(values = c("Men" = "green", "Women" = "red")) +
+  scale_shape_manual(values = c("Men" = 16, "Women" = 18)) + # Circle for Men, diamond for Women
+  labs(
+    title = "Marathon Times of NYC Marathon Winners Over the Years",
+    x = "Year",
+    y = "Marathon Time (hours:minutes)",
+    color = "Gender",
+    shape = "Gender"
+  ) +
+  theme_minimal()
+```
+
+**Oberservations:** The trends of both the men and women lines show that post 1980, the men and women both have stabilized around their respective averages. The plot also highlights year-to-year variability and anomalies (e.g., a spike in times in a specific year (more exploratory analysis could be done). Additionally, it allows direct comparison of men’s and women’s times across years, showing that men consistently have faster times. These temporal trends and comparative dynamics are not captured in the earlier plots (histogram or boxplot).
 
 ## 3 - US counties
 
