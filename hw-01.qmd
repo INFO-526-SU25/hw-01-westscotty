@@ -1,10 +1,12 @@
 ---
 title: "HW 01"
-author: "INSERT YOUR NAME HERE"
+author: "Weston Scott"
 format: 
   html:
     embed-resources: true
 toc: true
+editor:
+  render-on-save: true
 ---
 
 ## 0 - Setup
@@ -22,8 +24,51 @@ devtools::install_github("tidyverse/dsbox")
 ## 1 - Road traffic accidents in Edinburgh
 
 ```{r label-me-1}
-
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(lubridate)
 ```
+
+```{r}
+accidents <- read_csv("data/accidents.csv")
+glimpse(accidents)
+```
+
+```{r}
+accidents <- accidents %>%
+  mutate(
+    time_hour = hour(hms(time)) + minute(hms(time)) / 60, # Convert to decimal hours
+    day_type = case_when(
+      day_of_week %in% c("Saturday", "Sunday") ~ "Weekend",
+      TRUE ~ "Weekday"
+    ),
+    severity = factor(severity, levels = c("Fatal", "Serious", "Slight"))
+  ) %>%
+  filter(!is.na(time_hour)) # Remove rows with invalid time
+```
+
+```{r}
+ggplot(accidents, aes(x = time_hour, fill = severity)) +
+  geom_density(alpha = 0.5) +
+  facet_wrap(~ day_type, ncol = 1) +
+  scale_x_continuous(breaks = seq(0, 24, by = 4), labels = sprintf("%02d:00:00", seq(0, 24, by = 4))) +
+  # scale_fill_manual(values = c("Fatal" = "#6A0DAD", "Serious" = "#1F77B4", "Slight" = "#FFBB78")) +
+ scale_fill_manual(values = c("Fatal" = "purple", "Serious" = "cyan", "Slight" = "yellow")) +
+  labs(
+    title = "Number of accidents throughout the day",
+    subtitle = "By day of week and severity",
+    x = "Time of day",
+    y = "Density",
+    fill = "Severity"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "right")
+```
+
+### Interpretation
+
+The density plot illustrates the distribution of road traffic accidents in Edinburgh in 2018 across the day, separated by weekday and weekend, and categorized by severity. On weekdays, the density peaks around midday to afternoon, with "Slight" accidents dominating, while "Fatal" and "Serious" incidents are less frequent and more evenly distributed. On weekends, the peak shifts slightly later, with a higher concentration of "Slight" accidents in the afternoon and evening, possibly reflecting increased leisure travel. This pattern suggests that accident severity and timing vary with daily activity levels.
 
 ## 2 - NYC marathon winners
 
