@@ -28,6 +28,7 @@ library(readr)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
+library(scales)
 ```
 
 ```{r}
@@ -37,6 +38,7 @@ glimpse(accidents)
 
 ```{r}
 accidents <- accidents %>%
+
   mutate(
     time_hour = hour(hms(time)) + minute(hms(time)) / 60, # Convert to decimal hours
     day_type = case_when(
@@ -45,16 +47,21 @@ accidents <- accidents %>%
     ),
     severity = factor(severity, levels = c("Fatal", "Serious", "Slight"))
   ) %>%
-  filter(!is.na(time_hour)) # Remove rows with invalid time
+  filter(!is.na(time_hour)) # Clean up invalid time stamps
 ```
 
 ```{r}
 ggplot(accidents, aes(x = time_hour, fill = severity)) +
   geom_density(alpha = 0.5) +
+
   facet_wrap(~ day_type, ncol = 1) +
+
+  scale_y_continuous(labels = scientific) +
+
   scale_x_continuous(breaks = seq(0, 24, by = 4), labels = sprintf("%02d:00:00", seq(0, 24, by = 4))) +
-  # scale_fill_manual(values = c("Fatal" = "#6A0DAD", "Serious" = "#1F77B4", "Slight" = "#FFBB78")) +
+
  scale_fill_manual(values = c("Fatal" = "purple", "Serious" = "cyan", "Slight" = "yellow")) +
+
   labs(
     title = "Number of accidents throughout the day",
     subtitle = "By day of week and severity",
@@ -62,7 +69,9 @@ ggplot(accidents, aes(x = time_hour, fill = severity)) +
     y = "Density",
     fill = "Severity"
   ) +
+
   theme_minimal() +
+
   theme(legend.position = "right")
 ```
 
@@ -73,6 +82,80 @@ The density plot illustrates the distribution of road traffic accidents in Edinb
 ## 2 - NYC marathon winners
 
 ```{r label-me-2}
+marathon <- read_csv("data/nyc_marathon.csv")
+glimpse(marathon)
+```
+
+### Part a
+
+```{r}
+ggplot(data = marathon, mapping = aes(x = time)) +
+  geom_histogram() +
+  labs(
+    title = "Distribution of Marathon Times for NYC Marathon Winners",
+    x = "Marathon Time (hours)",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+ggplot(data = marathon, mapping = aes(y = time)) +
+  geom_boxplot() +
+  labs(
+    title = "Box Plot of Marathon Times for NYC Marathon Winners",
+    y = "Marathon Time (hours)",
+    x = ""
+  ) +
+  theme_minimal()
+```
+
+**Features Apparent in Each Plot**:
+The histogram and box plot reveal different aspects of the distribution of marathon times:
+
+-   **Features in the Histogram**:
+    The histogram shows the overall shape of the distribution (gaussian, etc.), including whether it’s unimodal or bimodal, and highlights the frequency of specific time ranges. These details about the distribution’s modality and density are not visible in the box plot.
+
+-   **Features in the Box Plot**:
+    The box plot emphasizes summary statistics, such as the median, interquartile range (IQR), and potential outliers. The quartile-based features and outliers are not explicitly shown in the histogram, which focuses on frequency rather than the statistical summaries of the data in question.
+
+### Part b
+
+```{r}
+marathon <- marathon %>%
+    mutate(time_hours = as.numeric(hms(time)) / 3600)
+```
+
+```{r}
+ggplot(marathon, aes(x = division, y = time, fill = division)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Men" = "green", "Women" = "red")) +
+  labs(
+    title = "Marathon Times of NYC Marathon Winners by Gender",
+    x = "Gender",
+    y = "Marathon Time (hours)",
+    fill = "Gender"
+  ) +
+  theme_minimal()
+```
+
+**Comparison**: The box plot separating the men's and women's results inform that the men's average time is faster, though with outlier results for the men slower then the average women's time. It should be observed as well that the height spread of the green vs red in the plot demonstrates that the men have a tighter grouping of times to their mean compared to the women.
+
+### Part c
+
+**Redundancy**: The plot uses both the x-axis labels "Men" and "Women", and the legend "Gender" to convey the same information. The fill aesthetic maps to division (or gender), and the legend repeats what is already clear from the x-axis categories.
+
+```{r}
+ggplot(marathon, aes(x = division, y = time, fill = division)) +
+  geom_boxplot() +
+  scale_fill_manual(values = c("Men" = "green", "Women" = "red")) +
+  labs(
+    title = "Marathon Times of NYC Marathon Winners by Gender",
+    x = "Gender",
+    y = "Marathon Time (hours)"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "none")
 
 ```
 
