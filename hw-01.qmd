@@ -9,6 +9,7 @@ editor:
   render-on-save: true
 execute:
   warning: false
+bibliography: references.bib
 ---
 
 ## 0 - Setup
@@ -29,6 +30,7 @@ library(lubridate)
 library(scales)
 library(openintro)
 library(gridExtra)
+library(knitr)
 ```
 
 ## 1 - Road traffic accidents in Edinburgh
@@ -234,7 +236,7 @@ plot_c <- ggplot(county, aes(x = homeownership, y = poverty)) +
 
 plot_d <- ggplot(county, aes(x = homeownership, y = poverty)) +
   geom_smooth(data = subset(county, metro == "yes"), show.legend = FALSE, se = FALSE, color = "blue") +
-  geom_smooth(data = subset(county, metro == "no"), show.legend = FALSE, se = FALSE, color = "blue") +
+  geom_smooth(data = subset(county, metro == "yes"), show.legend = FALSE, se = FALSE, color = "blue") +
   geom_point() +
   labs(
       title = "Plot D"
@@ -276,8 +278,16 @@ grid.arrange(plot_a, plot_b, plot_c, plot_d,
 
 ```
 
-<https://www.sthda.com/english/wiki/wiki.php?id_contents=7930>
+Found article on how to use `gridExtra::grid.arrange()` to display multiple plots in a grid layout [@sthda_ggplot2_scatter]. Another resource helped with understanding the various parameters for the smooth function [@ggplot2_geom_smooth].
 
 ## 4 - Rental apartments in SF
 
-## 5 - Napoleon’s march.
+```{r label-me-4}
+# TODO
+```
+
+## 5 - Napoleon’s march
+
+```{r label-me-5}
+# TODO
+```
