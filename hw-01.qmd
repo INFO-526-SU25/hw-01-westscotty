@@ -7,6 +7,8 @@ format:
 toc: true
 editor:
   render-on-save: true
+execute:
+  warning: false
 ---
 
 ## 0 - Setup
@@ -19,19 +21,19 @@ if (!require("pacman"))
 # pacman::p_load() 
 
 devtools::install_github("tidyverse/dsbox")
-```
 
-## 1 - Road traffic accidents in Edinburgh
-
-```{r label-me-1}
 library(readr)
 library(dplyr)
 library(ggplot2)
 library(lubridate)
 library(scales)
+library(openintro)
+library(gridExtra)
 ```
 
-```{r}
+## 1 - Road traffic accidents in Edinburgh
+
+```{r label-me-1}
 accidents <- read_csv("data/accidents.csv")
 glimpse(accidents)
 ```
@@ -84,6 +86,9 @@ The density plot illustrates the distribution of road traffic accidents in Edinb
 ```{r label-me-2}
 marathon <- read_csv("data/nyc_marathon.csv")
 glimpse(marathon)
+
+marathon <- marathon %>%
+  filter(!is.na(time_hrs))
 ```
 
 ### Part a
@@ -110,14 +115,11 @@ ggplot(data = marathon, mapping = aes(y = time)) +
   theme_minimal()
 ```
 
-**Features Apparent in Each Plot**:
-The histogram and box plot reveal different aspects of the distribution of marathon times:
+**Features Apparent in Each Plot**: The histogram and box plot reveal different aspects of the distribution of marathon times:
 
--   **Features in the Histogram**:
-    The histogram shows the overall shape of the distribution (gaussian, etc.), including whether it’s unimodal or bimodal, and highlights the frequency of specific time ranges. These details about the distribution’s modality and density are not visible in the box plot.
+-   **Features in the Histogram**: The histogram shows the overall shape of the distribution (gaussian, etc.), including whether it’s unimodal or bimodal, and highlights the frequency of specific time ranges. These details about the distribution’s modality and density are not visible in the box plot.
 
--   **Features in the Box Plot**:
-    The box plot emphasizes summary statistics, such as the median, interquartile range (IQR), and potential outliers. The quartile-based features and outliers are not explicitly shown in the histogram, which focuses on frequency rather than the statistical summaries of the data in question.
+-   **Features in the Box Plot**: The box plot emphasizes summary statistics, such as the median, interquartile range (IQR), and potential outliers. The quartile-based features and outliers are not explicitly shown in the histogram, which focuses on frequency rather than the statistical summaries of the data in question.
 
 ### Part b
 
@@ -179,6 +181,102 @@ ggplot(marathon, aes(x = year, y = time, color = division, shape = division)) +
 **Oberservations:** The trends of both the men and women lines show that post 1980, the men and women both have stabilized around their respective averages. The plot also highlights year-to-year variability and anomalies (e.g., a spike in times in a specific year (more exploratory analysis could be done). Additionally, it allows direct comparison of men’s and women’s times across years, showing that men consistently have faster times. These temporal trends and comparative dynamics are not captured in the earlier plots (histogram or boxplot).
 
 ## 3 - US counties
+
+```{r label-me-3}
+data(county)
+glimpse(county)
+```
+
+### Part a
+
+The code attempts to create a plot using geom_point and geom_boxplot, with an intent to explore the relationship between education level and income across counties for the geom_point plots, and then compare population distributions against smoking ban categories for the boxplots. This code will not render (or work) because it defines 2 aesthetics, which cause a conflict. Also the data in question between the two plots does not share any commonality, making the plot uninterpretable.
+
+`ggplot(county) +   geom_point(aes(x = median_edu, y = median_hh_income)) +   geom_boxplot(aes(x = smoking_ban, y = pop2017))`
+
+### Part b
+
+The second plot makes it easier to compare poverty levels across the different median education levels because it places the facet split in columns, allowing a side-by-side comparison of poverty distributions within a consistent vertical space, which is more intuitive for spotting trends or differences. Faceting variables represent comparison factors with a manageable number of items. The choice of row versus column faceting thus depends on the number of levels in the faceting variable and the need for horizontal versus vertical alignment to enhance readability and comparison ease. In this case, vertical faceting is more pleasing.
+
+```{r}
+ggplot(county %>% filter(!is.na(median_edu))) + 
+  geom_point(aes(x = homeownership, y = poverty)) + 
+  facet_grid(median_edu ~ .)
+
+ggplot(county %>% filter(!is.na(median_edu))) + 
+  geom_point(aes(x = homeownership, y = poverty)) + 
+  facet_grid(. ~ median_edu)
+```
+
+### Part c
+
+```{r}
+
+plot_a <- ggplot(county, aes(x = homeownership, y = poverty)) +
+  geom_point() +
+  labs(
+      title = "Plot A"
+  )
+
+plot_b <- ggplot(county, aes(x = homeownership, y = poverty)) +
+  geom_point() +
+  geom_smooth(se = FALSE) +
+  labs(
+      title = "Plot B"
+  )
+
+plot_c <- ggplot(county, aes(x = homeownership, y = poverty)) +
+  geom_point() +
+  geom_smooth(data = subset(county, metro == "yes"), show.legend = FALSE, se = FALSE, color = "green") +
+  geom_smooth(data = subset(county, metro == "no"), show.legend = FALSE, se = FALSE, color = "green") +
+  labs(
+      title = "Plot C"
+  )
+
+plot_d <- ggplot(county, aes(x = homeownership, y = poverty)) +
+  geom_smooth(data = subset(county, metro == "yes"), show.legend = FALSE, se = FALSE, color = "blue") +
+  geom_smooth(data = subset(county, metro == "no"), show.legend = FALSE, se = FALSE, color = "blue") +
+  geom_point() +
+  labs(
+      title = "Plot D"
+  )
+
+plot_e <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(aes(linetype = metro), se = FALSE, color = "blue") +
+  labs(
+      title = "Plot E"
+  )
+
+plot_f <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(se = FALSE) +
+  labs(
+      title = "Plot F"
+  )
+
+plot_g <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(se = FALSE, color = "blue") +
+  labs(
+      title = "Plot G"
+  )
+
+plot_h <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
+  geom_point(alpha = 0.6, size = 1) +
+  labs(
+      title = "Plot H"
+  )
+
+```
+
+```{r fig.width=6, fig.height=8}
+grid.arrange(plot_a, plot_b, plot_c, plot_d,
+             plot_e, plot_f, plot_g, plot_h,
+             ncol = 2)
+
+```
+
+<https://www.sthda.com/english/wiki/wiki.php?id_contents=7930>
 
 ## 4 - Rental apartments in SF
 
