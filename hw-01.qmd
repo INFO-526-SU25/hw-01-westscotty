@@ -23,14 +23,14 @@ if (!require("pacman"))
 
 devtools::install_github("tidyverse/dsbox")
 
-library(readr)
 library(dplyr)
 library(ggplot2)
-library(lubridate)
-library(scales)
-library(openintro)
 library(gridExtra)
 library(knitr)
+library(lubridate)
+library(openintro)
+library(readr)
+library(scales)
 ```
 
 ## 1 - Road traffic accidents in Edinburgh
@@ -41,42 +41,52 @@ glimpse(accidents)
 ```
 
 ```{r}
-accidents <- accidents %>%
+accidents <- accidents |>
+    mutate(
+        time_hour = hour(hms(time)) + 
+                    minute(hms(time)) / 60, ## Convert to decimal hours
+        
+        day_type = case_when(day_of_week %in% c("Saturday", 
+                                                "Sunday") ~ "Weekend", 
+                             TRUE ~ "Weekday"),
+        
+    severity = factor(severity, 
+                      levels = c("Fatal", 
+                                 "Serious", 
+                                 "Slight"))
+    ) |>
 
-  mutate(
-    time_hour = hour(hms(time)) + minute(hms(time)) / 60, # Convert to decimal hours
-    day_type = case_when(
-      day_of_week %in% c("Saturday", "Sunday") ~ "Weekend",
-      TRUE ~ "Weekday"
-    ),
-    severity = factor(severity, levels = c("Fatal", "Serious", "Slight"))
-  ) %>%
-  filter(!is.na(time_hour)) # Clean up invalid time stamps
+    filter(!is.na(time_hour)) ## Clean up NaNs
 ```
 
 ```{r}
-ggplot(accidents, aes(x = time_hour * 3600, fill = severity)) +
-  geom_density(alpha = 0.5) +
+ggplot(accidents, 
+       aes(x = time_hour * 3600, 
+           fill = severity)) +
 
-  facet_wrap(~ day_type, ncol = 1) +
+    geom_density(alpha = 0.5) +
+    facet_wrap(~ day_type, 
+               ncol = 1) +
 
-  scale_y_continuous(labels = scientific) +
+    scale_y_continuous(labels = scientific) +
+    scale_x_continuous(breaks = seq(0, 24*3600, 
+                                    by = 4*3600), 
+                       labels = sprintf("%02d:00:00", 
+                                        seq(0, 24, by = 4))) +
 
-  scale_x_continuous(breaks = seq(0, 24*3600, by = 4*3600), labels = sprintf("%02d:00:00", seq(0, 24, by = 4))) +
+     scale_fill_manual(values = c("Fatal" = "purple", 
+                                  "Serious" = "cyan", 
+                                  "Slight" = "yellow")) +
 
- scale_fill_manual(values = c("Fatal" = "purple", "Serious" = "cyan", "Slight" = "yellow")) +
+      labs(title = "Number of accidents throughout the day",
+           subtitle = "By day of week and severity",
+           x = "Time of day",
+           y = "Density",
+           fill = "Severity"
+          ) +
 
-  labs(
-    title = "Number of accidents throughout the day",
-    subtitle = "By day of week and severity",
-    x = "Time of day",
-    y = "Density",
-    fill = "Severity"
-  ) +
-
-  theme_minimal() +
-
-  theme(legend.position = "right")
+    theme_minimal() +
+    theme(legend.position = "right")
 ```
 
 ### Interpretation
@@ -89,30 +99,34 @@ The density plot illustrates the distribution of road traffic accidents in Edinb
 marathon <- read_csv("data/nyc_marathon.csv")
 glimpse(marathon)
 
-marathon <- marathon %>%
-  filter(!is.na(time_hrs))
+marathon <- marathon |>
+    filter(!is.na(time_hrs))
 ```
 
 ### Part a
 
 ```{r}
-ggplot(data = marathon, mapping = aes(x = time)) +
-  geom_histogram() +
-  labs(
-    title = "Distribution of Marathon Times for NYC Marathon Winners",
-    x = "Marathon Time (hours)",
-    y = "Count"
-  )
+ggplot(data = marathon, 
+       mapping = aes(x = time)) +
+
+    geom_histogram() +
+    labs(
+        title = "Distribution of Marathon Times for NYC Marathon Winners",
+        x = "Marathon Time (hours)",
+        y = "Count"
+    )
 ```
 
 ```{r}
-ggplot(data = marathon, mapping = aes(y = time)) +
-  geom_boxplot() +
-  labs(
-    title = "Box Plot of Marathon Times for NYC Marathon Winners",
-    y = "Marathon Time (hours)",
-    x = ""
-  )
+ggplot(data = marathon, 
+       mapping = aes(y = time)) +
+
+    geom_boxplot() +
+    labs(
+        title = "Box Plot of Marathon Times for NYC Marathon Winners",
+        y = "Marathon Time (hours)",
+        x = ""
+    )
 ```
 
 **Features Apparent in Each Plot**: The histogram and box plot reveal different aspects of the distribution of marathon times:
@@ -124,20 +138,26 @@ ggplot(data = marathon, mapping = aes(y = time)) +
 ### Part b
 
 ```{r}
-marathon <- marathon %>%
+marathon <- marathon |>
     mutate(time_hours = as.numeric(hms(time)) / 3600)
 ```
 
 ```{r}
-ggplot(marathon, aes(x = division, y = time, fill = division)) +
-  geom_boxplot() +
-  scale_fill_manual(values = c("Men" = "green", "Women" = "red")) +
-  labs(
-    title = "Marathon Times of NYC Marathon Winners by Gender",
-    x = "Gender",
-    y = "Marathon Time (hours)",
-    fill = "Gender"
-  )
+ggplot(marathon, 
+       aes(x = division, 
+           y = time, 
+           fill = division)) +
+
+    geom_boxplot() +
+    scale_fill_manual(values = c("Men" = "green", 
+                               "Women" = "red")) +
+
+    labs(
+        title = "Marathon Times of NYC Marathon Winners by Gender",
+        x = "Gender",
+        y = "Marathon Time (hours)",
+        fill = "Gender"
+    )
 ```
 
 **Comparison**: The box plot separating the men's and women's results inform that the men's average time is faster, though with outlier results for the men slower then the average women's time. It should be observed as well that the height spread of the green vs red in the plot demonstrates that the men have a tighter grouping of times to their mean compared to the women.
@@ -147,33 +167,48 @@ ggplot(marathon, aes(x = division, y = time, fill = division)) +
 **Redundancy**: The plot uses both the x-axis labels "Men" and "Women", and the legend "Gender" to convey the same information. The fill aesthetic maps to division (or gender), and the legend repeats what is already clear from the x-axis categories.
 
 ```{r}
-ggplot(marathon, aes(x = division, y = time, fill = division)) +
-  geom_boxplot() +
-  scale_fill_manual(values = c("Men" = "green", "Women" = "red")) +
-  labs(
-    title = "Marathon Times of NYC Marathon Winners by Gender",
-    x = "Gender",
-    y = "Marathon Time (hours)"
-  ) +
+ggplot(marathon, 
+       aes(x = division, 
+           y = time, 
+           fill = division)) +
 
-  theme(legend.position = "none")
+    geom_boxplot() +
+    scale_fill_manual(values = c("Men" = "green", 
+                               "Women" = "red")) +
+
+    labs(
+        title = "Marathon Times of NYC Marathon Winners by Gender",
+        x = "Gender",
+        y = "Marathon Time (hours)"
+    ) +
+    
+    theme(legend.position = "none")
 ```
 
 ### Part d
 
 ```{r}
-ggplot(marathon, aes(x = year, y = time, color = division, shape = division)) +
-  geom_point(size = 3) +
-  geom_line() +
-  scale_color_manual(values = c("Men" = "green", "Women" = "red")) +
-  scale_shape_manual(values = c("Men" = 16, "Women" = 18)) + # Circle for Men, diamond for Women
-  labs(
-    title = "Marathon Times of NYC Marathon Winners Over the Years",
-    x = "Year",
-    y = "Marathon Time (hours:minutes)",
-    color = "Gender",
-    shape = "Gender"
-  )
+ggplot(marathon, 
+       aes(x = year, 
+           y = time, 
+           color = division, 
+           shape = division)) +
+
+    geom_point(size = 3) +
+    geom_line() +
+    scale_color_manual(values = c("Men" = "green", 
+                                  "Women" = "red")) +
+
+    scale_shape_manual(values = c("Men" = 16, 
+                                  "Women" = 18)) + 
+
+    labs(
+        title = "Marathon Times of NYC Marathon Winners Over the Years",
+        x = "Year",
+        y = "Marathon Time (hours:minutes)",
+        color = "Gender",
+        shape = "Gender"
+    )
 ```
 
 **Oberservations:** The trends of both the men and women lines show that post 1980, the men and women both have stabilized around their respective averages. The plot also highlights year-to-year variability and anomalies (e.g., a spike in times in a specific year (more exploratory analysis could be done). Additionally, it allows direct comparison of men’s and women’s times across years, showing that men consistently have faster times. These temporal trends and comparative dynamics are not captured in the earlier plots (histogram or boxplot).
@@ -197,81 +232,162 @@ The second plot makes it easier to compare poverty levels across the different m
 
 ```{r}
 ggplot(county %>% filter(!is.na(median_edu))) + 
-  geom_point(aes(x = homeownership, y = poverty)) + 
-  facet_grid(median_edu ~ .)
+    geom_point(aes(x = homeownership, y = poverty)) + 
+    facet_grid(median_edu ~ .)
 
 ggplot(county %>% filter(!is.na(median_edu))) + 
-  geom_point(aes(x = homeownership, y = poverty)) + 
-  facet_grid(. ~ median_edu)
+    geom_point(aes(x = homeownership, y = poverty)) + 
+    facet_grid(. ~ median_edu)
 ```
 
 ### Part c
 
 ```{r}
+####### Plot A #######
+plot_a <- ggplot(county, 
+                 aes(x = homeownership,
+                     y = poverty)) +
 
-plot_a <- ggplot(county, aes(x = homeownership, y = poverty)) +
-  geom_point() +
-  labs(
-      title = "Plot A"
-  )
+    geom_point() +
+    labs(
+        title = "Plot A"
+    )
+```
 
-plot_b <- ggplot(county, aes(x = homeownership, y = poverty)) +
-  geom_point() +
-  geom_smooth(se = FALSE) +
-  labs(
-      title = "Plot B"
-  )
+```{r}
+####### Plot B #######
+plot_b <- ggplot(county, 
+                 aes(x = homeownership, 
+                     y = poverty)) +
 
-plot_c <- ggplot(county, aes(x = homeownership, y = poverty)) +
-  geom_point() +
-  geom_smooth(data = subset(county, metro == "yes"), show.legend = FALSE, se = FALSE, color = "green") +
-  geom_smooth(data = subset(county, metro == "no"), show.legend = FALSE, se = FALSE, color = "green") +
-  labs(
-      title = "Plot C"
-  )
+    geom_point() +
+    geom_smooth(se = FALSE) +
+    labs(
+        title = "Plot B"
+    )
+```
 
-plot_d <- ggplot(county, aes(x = homeownership, y = poverty)) +
-  geom_smooth(data = subset(county, metro == "yes"), show.legend = FALSE, se = FALSE, color = "blue") +
-  geom_smooth(data = subset(county, metro == "yes"), show.legend = FALSE, se = FALSE, color = "blue") +
-  geom_point() +
-  labs(
-      title = "Plot D"
-  )
+```{r}
+####### Plot C #######
+plot_c <- ggplot(county, 
+                 aes(x = homeownership, 
+                     y = poverty)) +
+    geom_point() +
+    geom_smooth(data = subset(county, 
+                              metro == "yes"), 
+                show.legend = FALSE, 
+                se = FALSE, 
+                color = "green") +
 
-plot_e <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(aes(linetype = metro), se = FALSE, color = "blue") +
-  labs(
-      title = "Plot E"
-  )
+    geom_smooth(data = subset(county, 
+                              metro == "no"), 
+                show.legend = FALSE, 
+                se = FALSE, 
+                color = "green") +
 
-plot_f <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(se = FALSE) +
-  labs(
-      title = "Plot F"
-  )
+    labs(
+        title = "Plot C"
+    )
+```
 
-plot_g <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
-  geom_point(alpha = 0.6) +
-  geom_smooth(se = FALSE, color = "blue") +
-  labs(
-      title = "Plot G"
-  )
+```{r}
+####### Plot D #######
+plot_d <- ggplot(county, 
+                 aes(x = homeownership, 
+                     y = poverty)) +
 
-plot_h <- ggplot(county, aes(x = homeownership, y = poverty, color = metro)) +
-  geom_point(alpha = 0.6, size = 1) +
-  labs(
-      title = "Plot H"
-  )
+    geom_smooth(data = subset(county, 
+                              metro == "yes"), 
+                show.legend = FALSE, 
+                se = FALSE, 
+                color = "blue") +
 
+    geom_smooth(data = subset(county, 
+                              metro == "yes"), 
+                show.legend = FALSE, 
+                se = FALSE, 
+                color = "blue") +
+
+    geom_point() +
+    labs(
+        title = "Plot D"
+    )
+```
+
+```{r}
+####### Plot E #######
+plot_e <- ggplot(county, 
+                 aes(x = homeownership, 
+                     y = poverty, 
+                     color = metro)) +
+
+    geom_point(alpha = 0.6) +
+    geom_smooth(aes(linetype = metro), 
+                se = FALSE, 
+                color = "blue") +
+
+    labs(
+        title = "Plot E"
+    )
+```
+
+```{r}
+####### Plot F #######
+plot_f <- ggplot(county, 
+                 aes(x = homeownership, 
+                     y = poverty, 
+                     color = metro)) +
+
+    geom_point(alpha = 0.6) +
+    geom_smooth(se = FALSE) +
+    labs(
+        title = "Plot F"
+    )
+```
+
+```{r}
+####### Plot G #######
+plot_g <- ggplot(county, 
+                 aes(x = homeownership, 
+                     y = poverty, 
+                     color = metro)) +
+
+    geom_point(alpha = 0.6) +
+    geom_smooth(se = FALSE, 
+              color = "blue") +
+    
+    labs(
+        title = "Plot G"
+    )
+```
+
+```{r}
+####### Plot H #######
+plot_h <- ggplot(county, 
+                 aes(x = homeownership, 
+                     y = poverty, 
+                     color = metro)) +
+
+    geom_point(alpha = 0.6, 
+               size = 1) +
+
+    labs(
+        title = "Plot H"
+    )
 ```
 
 ```{r fig.width=6, fig.height=8}
-grid.arrange(plot_a, plot_b, plot_c, plot_d,
-             plot_e, plot_f, plot_g, plot_h,
-             ncol = 2)
-
+grid.arrange(
+    plot_a, 
+    plot_b, 
+    plot_c, 
+    plot_d,
+    plot_e, 
+    plot_f, 
+    plot_g, 
+    plot_h,
+    ncol = 2
+)
 ```
 
 Found article on how to use `gridExtra::grid.arrange()` to display multiple plots in a grid layout [@sthda_ggplot2_scatter]. Another resource helped with understanding the various parameters for the smooth function [@ggplot2_geom_smooth].
@@ -286,31 +402,59 @@ glimpse(credit)
 ### Part a
 
 ```{r}
-credit <- credit %>%
-  mutate( 
-      student = factor(student, levels = c("No", "Yes")), 
-      married = factor(married, levels = c("No", "Yes"))
-  )
+credit <- credit |>
+    mutate( 
+        student = factor(student, 
+                         levels = c("No", 
+                                    "Yes")), 
+        
+        married = factor(married, 
+                         levels = c("No", 
+                                    "Yes"))
+    )
 ```
 
 ```{r}
+ggplot(credit, 
+       aes(x = income, 
+           y = balance, 
+           color= student)) +
 
-ggplot(credit, aes(x = income, y = balance, color= student)) +
-  geom_point(aes(shape = student), alpha = 0.6, size = 2, show.legend = FALSE) +
-  geom_smooth(method = "lm", se = FALSE) +
+    geom_point(aes(shape = student), 
+               alpha = 0.6, 
+               size = 2, 
+               show.legend = FALSE) +
 
-  scale_y_continuous(breaks = seq(0, 2000, by = 500), labels = sprintf("$%d", seq(0, 2000, by = 500))) +
-  scale_x_continuous(breaks = seq(0, 200, by = 50), labels = sprintf("$%dK", seq(0, 200, by = 50))) +
+    geom_smooth(method = "lm", 
+                se = FALSE) +
+    
+    scale_y_continuous(breaks = seq(0, 2000, 
+                                    by = 500), 
+                       labels = sprintf("$%d", 
+                                        seq(0, 2000, 
+                                            by = 500))) +
 
-  facet_grid(student ~ married, labeller = label_both) +
-  labs(
-    x = "Income",
-    y = "Credit Card Balance",
-    color = "Student",
-    shape = "Student"
-  ) +
-  scale_color_manual(values = c("No" = "red", "Yes" = "green")) +
-  scale_shape_manual(values = c("No" = 16, "Yes" = 17))
+    scale_x_continuous(breaks = seq(0, 200, 
+                                    by = 50), 
+                       labels = sprintf("$%dK", 
+                                        seq(0, 200, 
+                                            by = 50))) +
+    
+    facet_grid(student ~ married, 
+               labeller = label_both) +
+
+    labs(
+        x = "Income",
+        y = "Credit Card Balance",
+        color = "Student",
+        shape = "Student"
+    ) +
+
+    scale_color_manual(values = c("No" = "red", 
+                                  "Yes" = "green")) +
+
+    scale_shape_manual(values = c("No" = 16, 
+                                  "Yes" = 17))
 ```
 
 The faceted scatterplot above shows a positive relationship between income and credit card balance across all groups, where higher incomes generally corresponds to a higher overall balance. Non-students, especially married show increased credit balance with higher income, compared to students who tend to have lower balances at similar income levels, regardless of marital status. Unmarried students show the flattest trend. This could suggest that student status minimizes the relationship more than marital status.
@@ -322,7 +466,7 @@ I think that the married, student, and income factors play a major role in basic
 ### Part c
 
 ```{r}
-credit <- credit %>%
+credit <- credit |>
   mutate(
     credit_usage = balance / limit * 100
   )
@@ -330,22 +474,45 @@ credit <- credit %>%
 
 ```{r}
 
-ggplot(credit, aes(x = income, y = credit_usage, color= student)) +
-  geom_point(aes(shape = student), alpha = 0.6, size = 2, show.legend = FALSE) +
-  geom_smooth(method = "lm", se = FALSE) +
+ggplot(credit, 
+       aes(x = income, 
+           y = credit_usage, 
+           color= student)) +
 
-  scale_y_continuous(breaks = seq(0, 30, by = 10), labels = sprintf("%d%%", seq(0, 30, by = 10))) +
-  scale_x_continuous(breaks = seq(0, 200, by = 50), labels = sprintf("$%dK", seq(0, 200, by = 50))) +
+    geom_point(aes(shape = student), 
+               alpha = 0.6, 
+               size = 2, 
+               show.legend = FALSE) +
 
-  facet_grid(student ~ married, labeller = label_both) +
-  labs(
-    x = "Income",
-    y = "Credit Card Balance",
-    color = "Student",
-    shape = "Student"
-  ) +
-  scale_color_manual(values = c("No" = "red", "Yes" = "green")) +
-  scale_shape_manual(values = c("No" = 16, "Yes" = 17))
+    geom_smooth(method = "lm", 
+                se = FALSE) +
+    
+    scale_y_continuous(breaks = seq(0, 30, 
+                                    by = 10), 
+                       labels = sprintf("%d%%", 
+                                        seq(0, 30, 
+                                            by = 10))) +
+    scale_x_continuous(breaks = seq(0, 200, 
+                                    by = 50), 
+                       labels = sprintf("$%dK", 
+                                        seq(0, 200, 
+                                            by = 50))) +
+    
+    facet_grid(student ~ married, 
+               labeller = label_both) +
+
+    labs(
+        x = "Income",
+        y = "Credit Card Balance",
+        color = "Student",
+        shape = "Student"
+    ) +
+
+    scale_color_manual(values = c("No" = "red", 
+                                  "Yes" = "green")) +
+
+    scale_shape_manual(values = c("No" = 16, 
+                                  "Yes" = 17))
 ```
 
 ### Part d
@@ -358,5 +525,14 @@ In contrast, the previous plot shows a consistent positive balance increase for 
 
 ```{r label-me-5}
 napoleon <- read_rds("data/napoleon.rds")
-glimpse(napoleon)
+cities <- napoleon$cities
+temperatures <- napoleon$temperatures
+troops <- napoleon$troops
+
+glimpse(cities)
+glimpse(temperatures)
+glimpse(troops)
+```
+
+```{r}
 ```
