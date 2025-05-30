@@ -139,7 +139,9 @@ ggplot(data = marathon,
 
 ```{r}
 marathon <- marathon |>
-    mutate(time_hours = as.numeric(hms(time)) / 3600)
+    mutate(
+        time_hours = as.numeric(hms(time)) / 3600
+    )
 ```
 
 ```{r}
@@ -522,6 +524,8 @@ The plot shows that the relationship between income and credit utilization diffe
 In contrast, the previous plot shows a consistent positive balance increase for all groups, with non-students having higher balances and students having lower ones. This suggests that a student status is impacts the income-utilization relationship more, while marital status improves the effect among non-students for both sides.
 
 ## 5 - Napoleon’s march
+
+Found a good reference to recreating this famous plot [@heiss_minard_ggplot2]
 
 ```{r label-me-5}
 napoleon <- read_rds("data/napoleon.rds")

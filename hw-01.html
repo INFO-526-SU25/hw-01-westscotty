@@ -2443,7 +2443,9 @@ $ note     &lt;chr&gt; &quot;Course record&quot;, &quot;No woman finishers&quot;
 <h3 class="anchored" data-anchor-id="part-b">Part b</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>marathon <span class="ot">&lt;-</span> marathon <span class="sc">|&gt;</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">time_hours =</span> <span class="fu">as.numeric</span>(<span class="fu">hms</span>(time)) <span class="sc">/</span> <span class="dv">3600</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">time_hours =</span> <span class="fu">as.numeric</span>(<span class="fu">hms</span>(time)) <span class="sc">/</span> <span class="dv">3600</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(marathon, </span>
@@ -2891,6 +2893,7 @@ $ limit   &lt;dbl&gt; 3606, 6645, 7075, 9504, 4897, 8047, 3388, 7114, 3300, 6819
 </section>
 <section id="napoleons-march" class="level2">
 <h2 class="anchored" data-anchor-id="napoleons-march">5 - Napoleon’s march</h2>
+<p>Found a good reference to recreating this famous plot <span class="citation" data-cites="heiss_minard_ggplot2">(<a href="#ref-heiss_minard_ggplot2" role="doc-biblioref">Heiss 2017</a>)</span></p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>napoleon <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">&quot;data/napoleon.rds&quot;</span>)</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>cities <span class="ot">&lt;-</span> napoleon<span class="sc">$</span>cities</span>
@@ -2930,6 +2933,9 @@ $ group     &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-heiss_minard_ggplot2" class="csl-entry" role="listitem">
+Heiss, Andrew. 2017. <span>“Exploring Minard’s 1812 Plot with Ggplot2.”</span> andrewheiss.com; <a href="https://www.andrewheiss.com/blog/2017/08/10/exploring-minards-1812-plot-with-ggplot2/" class="uri">https://www.andrewheiss.com/blog/2017/08/10/exploring-minards-1812-plot-with-ggplot2/</a>.
+</div>
 <div id="ref-sthda_ggplot2_scatter" class="csl-entry" role="listitem">
 STHDA. 2023. <span>“Ggplot2 Scatter Plots.”</span> <a href="https://www.sthda.com/english/wiki/wiki.php?id_contents=7930" class="uri">https://www.sthda.com/english/wiki/wiki.php?id_contents=7930</a>.
 </div>
