@@ -16,24 +16,29 @@ bibliography: references.bib
 
 ```{r library_setup}
 if (!require("pacman")) 
-  install.packages("pacman")
+    install.packages("pacman")
 
-# use this line for installing/loading
-# pacman::p_load() 
+# Use pacman::p_load to install and load CRAN packages
+pacman::p_load(
+  dplyr,
+  ggplot2,
+  ggthemes,
+  grid,
+  gridExtra,
+  knitr,
+  lubridate,
+  openintro,
+  readr,
+  scales
+)
 
-devtools::install_github("tidyverse/dsbox")
-
-library(dplyr)
-library(ggplot2)
-library(ggthemes)
-library(grid)
-library(gridExtra)
-library(knitr)
-library(lubridate)
-library(openintro)
-library(pander)
-library(readr)
-library(scales)
+# Handle GitHub package separately
+if (!require("dsbox")) {
+  # Install devtools if not present
+  if (!require("devtools")) install.packages("devtools")
+  devtools::install_github("tidyverse/dsbox")
+  library(dsbox)
+}
 ```
 
 ## 1 - Road traffic accidents in Edinburgh
@@ -519,8 +524,6 @@ In contrast, the previous plot shows a consistent positive balance increase for 
 
 ## 5 - Napoleon’s march
 
-Found a good reference to recreating this famous plot [@heiss_minard_ggplot2]
-
 ```{r 5_load_data}
 napoleon <- read_rds("data/napoleon.rds")
 cities <- napoleon$cities
@@ -532,19 +535,17 @@ glimpse(temperatures)
 glimpse(troops)
 ```
 
-**Recreation Steps:**
+### **Recreation Steps**
 
--   Map lat/long positions of troop groups from the troop data using `geom_path`
+I found a good reference to recreating this famous plot [@heiss_minard_ggplot2], that helped with overall structure, but not
 
--   Color the lines by direction of troop movement as part of the aesthetics mapping
+#### Movement Plot
 
--   Change the size of the troop lines based on the survivor count
+I started with making an overall ggplot object, because different dataframes will need to be overlaid and used simultaneously. The first component to add was the `geom_path` object which allowed me to map lat/long positions of troop groups, and color the lines by direction of troop movement as part of the aesthetics mapping. I was also able to change the size of the troop lines based on the survivor count, and finally add the `lineend = "round"` argument to because without it, the line segments to not appear to be continuous, resulting in poor visuals.
 
--   Need to add the `lineend = "round"` argument to `geom_path` because without it, the line segments to not appear to be continuous,
+The next object was the `geom_point`, with which I was able to set the data to use cities in order to plot the map region with respect to where cities are located. The aesthetics mapping uses only lat and long, ensuring an overlay on top of the first part (`geom_path`). The third object was a `geom_text`, which also used the city dataframe, but is for labeling the points now. The aesthetics mapping uses only lat and long again, but also the label set to the city values. From there, I was able to adjust the vertical placement of the label with `vjust` for offsetting the label from the point.
 
--   Need to also adjust the size scaling of the lines with `scale_size`
-
--   Map the colors specifically to tan and black with `scale_colour_manual`
+The last half of the code section for the movement plot is themes, scales, and labels. It was necessary to adjust the size scaling of the lines for the troops with `scale_size` to have them only grow and shrink to a mapping of 1-10 instead of the values of the data (which is a large number for scaling a line thickness). Then I map the colors specifically to tan and black with `scale_colour_manual`. Only the y-axis label gets a label, since the temperature plot below will have a x-axis label for the longitude. The gridlines are turned off for this plot (with an attempt made to use the longitude lines from the temperatures). In order to plot the 2 parts of this overall map together, I played with the margin an set the bottom margin to 0, to allow the 2 plots to stitch together nicely.
 
 ```{r napoleon_movement_plot, fig.width=8.5, fig.height=4.5}
 movements_plot <- ggplot() +
@@ -587,6 +588,10 @@ movements_plot <- ggplot() +
 movements_plot
 ```
 
+#### Temperatures Plot
+
+The temperature plot uses one overall aesthetic mapping based on the temperature data, mapping longitude versus temperature. I used the `geom_path` to create the temperature similarly to the movements plot, that way I can have the lines map to a color gradient for the temperature differences as well as have the lines grow in thickness as the temperature grows. I managed to plot the temperature values along the line using the `geom_text` function again, I needed to add the date as well, to do that I would need to create multiple aesthetic mappings as was done in the movements plot in order to utilize multiple dataframes. I adjusted the top margin on this plot to stitch below the movement plot.
+
 ```{r napoleon_temp_plot, fig.width=8.5, fig.height=2}
 temps_plot <- ggplot(data = temperatures, 
                      aes(x = long, 
@@ -598,10 +603,6 @@ temps_plot <- ggplot(data = temperatures,
     
     geom_text(aes(label = temp), 
               vjust = 1.75) +
-
-    geom_text(aes(label = temp), 
-              vjust = 1.75) +
-
     
     scale_color_gradient(low = "darkblue", 
                          high = "darkred") +
@@ -620,7 +621,9 @@ temps_plot <- ggplot(data = temperatures,
 temps_plot
 ```
 
-Found more help on merging plots and making borders [@R-ggplot2], [@R-gridExtra], [@R-grid].
+#### Combination Plot
+
+Combining the two plots was seamless after adjusting the margins (which took a bit of time to figure out). However, I had to scale the movement plot to take more height that the temperature plot, then ultimately add a border around the plot. Found help on merging plots and making borders [@R-ggplot2], [@R-gridExtra], [@R-grid].
 
 ```{r napoleon_combined_plot, fig.width=8.5, fig.height=6.5}
 combo_plot <- grid.arrange(movements_plot,
@@ -632,12 +635,16 @@ combo_plot <- grid.arrange(movements_plot,
 grid.newpage()
 grid.draw(combo_plot)
 grid.rect(
-    x = unit(0.5, "npc"),  # Center of the page
-    y = unit(0.5, "npc"),  # Center of the page
-    width = unit(1, "npc"),  # Full width
-    height = unit(1, "npc"), # Full height
+    x = unit(0.5, "npc"),
+    y = unit(0.5, "npc"),
+    width = unit(1, "npc"),
+    height = unit(1, "npc"),
     gp = gpar(col = "black", 
               fill = NA, 
-              lwd = 1)  # Border properties
+              lwd = 1)
 )
 ```
+
+#### Missing Parts
+
+Parts left out that would make this stand out better include mapping the longitude gridlines from the temperature plot all the way up through the movements plot, which is a theme mapping componenet that I tried to mess with, ultimately failed in doing it. I also left out adding the dates and better labeling the temperature points.
