@@ -20,24 +20,25 @@ if (!require("pacman"))
 
 # Use pacman::p_load to install and load CRAN packages
 pacman::p_load(
-  dplyr,
-  ggplot2,
-  ggthemes,
-  grid,
-  gridExtra,
-  knitr,
-  lubridate,
-  openintro,
-  readr,
-  scales
+      dplyr,
+      ggplot2,
+      ggthemes,
+      grid,
+      gridExtra,
+      knitr,
+      lubridate,
+      openintro,
+      readr,
+      scales
 )
 
 # Handle GitHub package separately
 if (!require("dsbox")) {
-  # Install devtools if not present
-  if (!require("devtools")) install.packages("devtools")
-  devtools::install_github("tidyverse/dsbox")
-  library(dsbox)
+      # Install devtools if not present
+      if (!require("devtools")) 
+          install.packages("devtools")
+devtools::install_github("tidyverse/dsbox")
+      library(dsbox)
 }
 ```
 
@@ -137,11 +138,17 @@ ggplot(data = marathon,
     )
 ```
 
-**Features Apparent in Each Plot**: The histogram and box plot reveal different aspects of the distribution of marathon times:
+#### Features Apparent in Each Plot
 
--   **Features in the Histogram**: The histogram shows the overall shape of the distribution (gaussian, etc.), including whether it’s unimodal or bimodal, and highlights the frequency of specific time ranges. These details about the distribution’s modality and density are not visible in the box plot.
+The histogram and box plot reveal different aspects of the distribution of marathon times:
 
--   **Features in the Box Plot**: The box plot emphasizes summary statistics, such as the median, interquartile range (IQR), and potential outliers. The quartile-based features and outliers are not explicitly shown in the histogram, which focuses on frequency rather than the statistical summaries of the data in question.
+#### Features in the Histogram
+
+The histogram shows the overall shape of the distribution (gaussian, etc.), including whether it’s unimodal or bimodal, and highlights the frequency of specific time ranges. These details about the distribution’s modality and density are not visible in the box plot.
+
+#### Features in the Box Plot
+
+The box plot emphasizes summary statistics, such as the median, interquartile range (IQR), and potential outliers. The quartile-based features and outliers are not explicitly shown in the histogram, which focuses on frequency rather than the statistical summaries of the data in question.
 
 ### Part b
 
@@ -170,7 +177,9 @@ ggplot(marathon,
     )
 ```
 
-**Comparison**: The box plot separating the men's and women's results inform that the men's average time is faster, though with outlier results for the men slower then the average women's time. It should be observed as well that the height spread of the green vs red in the plot demonstrates that the men have a tighter grouping of times to their mean compared to the women.
+#### Comparison
+
+The box plot separating the men's and women's results inform that the men's average time is faster, though with outlier results for the men slower then the average women's time. It should be observed as well that the height spread of the green vs red in the plot demonstrates that the men have a tighter grouping of times to their mean compared to the women.
 
 ### Part c
 
@@ -221,7 +230,9 @@ ggplot(marathon,
     )
 ```
 
-**Oberservations:** The trends of both the men and women lines show that post 1980, the men and women both have stabilized around their respective averages. The plot also highlights year-to-year variability and anomalies (e.g., a spike in times in a specific year (more exploratory analysis could be done). Additionally, it allows direct comparison of men’s and women’s times across years, showing that men consistently have faster times. These temporal trends and comparative dynamics are not captured in the earlier plots (histogram or boxplot).
+#### Oberservations
+
+The trends of both the men and women lines show that post 1980, the men and women both have stabilized around their respective averages. The plot also highlights year-to-year variability and anomalies (e.g., a spike in times in a specific year (more exploratory analysis could be done). Additionally, it allows direct comparison of men’s and women’s times across years, showing that men consistently have faster times. These temporal trends and comparative dynamics are not captured in the earlier plots (histogram or boxplot).
 
 ## 3 - US counties
 
