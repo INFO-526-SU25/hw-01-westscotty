@@ -320,7 +320,7 @@ plot_d <- ggplot(county,
                 color = "blue") +
 
     geom_smooth(data = subset(county, 
-                              metro == "yes"), 
+                              metro == "no"), 
                 show.legend = FALSE, 
                 se = FALSE, 
                 color = "blue") +
@@ -389,7 +389,7 @@ plot_h <- ggplot(county,
     )
 ```
 
-```{r plot_part_3c, fig.width=6, fig.height=8}
+```{r plot_part_3c, fig.width=8, fig.height=8}
 grid.arrange(
     plot_a, 
     plot_b, 
