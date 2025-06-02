@@ -84,7 +84,7 @@ ggplot(accidents,
                                         seq(0, 24, by = 4))) +
 
      scale_fill_manual(values = c("Fatal" = "purple4", 
-                                  "Serious" = "cyan", 
+                                  "Serious" = "steelblue3", 
                                   "Slight" = "yellow")) +
 
       labs(title = "Number of accidents throughout the day",
