@@ -128,7 +128,7 @@ ggplot(data = marathon,
 
 ```{r boxplot_part_2a}
 ggplot(data = marathon, 
-       mapping = aes(y = time)) +
+       mapping = aes(x = time)) +
 
     geom_boxplot() +
     labs(
