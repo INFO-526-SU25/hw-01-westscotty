@@ -23,6 +23,7 @@ pacman::p_load(
       dplyr,
       ggplot2,
       ggthemes,
+      glue,
       grid,
       gridExtra,
       knitr,
@@ -183,7 +184,7 @@ The box plot separating the men's and women's results inform that the men's aver
 
 ### Part c
 
-**Redundancy**: The plot uses both the x-axis labels "Men" and "Women", and the legend "Gender" to convey the same information. The fill aesthetic maps to division (or gender), and the legend repeats what is already clear from the x-axis categories.
+**Redundancy**: The plot uses both the x-axis labels "Men" and "Women", and the legend "Gender" to convey the same information. The fill aesthetic maps to division (or gender), and the legend repeats what is already clear from the x-axis categories. Honestly, it could work even plotting the dataset as a whole and then the box-plots can be essentially inline, since they are in different regions, simply color the data by the gender as well.
 
 ```{r plot_part_2c}
 ggplot(marathon, 
@@ -578,6 +579,12 @@ movements_plot <- ggplot() +
                   label = city), 
               vjust = 1.5) +
 
+    geom_vline(data = temperatures,
+               aes(xintercept = long), 
+               color = "grey60", 
+               linetype = "dashed", 
+               size = 0.3) +
+
     scale_size(range = c(1, 10)) +
     scale_colour_manual(values = c("tan", "darkgrey")) +
     labs(
@@ -603,31 +610,63 @@ movements_plot
 
 The temperature plot uses one overall aesthetic mapping based on the temperature data, mapping longitude versus temperature. I used the `geom_path` to create the temperature similarly to the movements plot, that way I can have the lines map to a color gradient for the temperature differences as well as have the lines grow in thickness as the temperature grows. I managed to plot the temperature values along the line using the `geom_text` function again, I needed to add the date as well, to do that I would need to create multiple aesthetic mappings as was done in the movements plot in order to utilize multiple dataframes. I adjusted the top margin on this plot to stitch below the movement plot.
 
+After much time and exploring through the lecture videos more, I figured out that I could use a `geom_vline` to add a vertical component that I can add to both independent plots. I also learned that the vertical adjustment of text is like any other variable, and it can be modified at will, as I did with mutating and creating a new field based on the temperature case.
+
 ```{r napoleon_temp_plot, fig.width=8.5, fig.height=2}
+
+temperatures <- temperatures |>
+    mutate(
+        temp_labels = glue("{temp} °C"),
+        month_day = glue("{month}-{day}"),
+        label_vjust = case_when(
+          temp <= -15 ~ -1.0,   
+          TRUE ~ 2.0 
+        )
+    )
+
 temps_plot <- ggplot(data = temperatures, 
                      aes(x = long, 
                          y = temp)) +
-
     geom_path(aes(color = temp, 
                   size = temp),
-             lineend = "round") + 
+              lineend = "round") + 
     
-    geom_text(aes(label = temp), 
-              vjust = 1.75) +
-    
-    scale_color_gradient(low = "darkblue", 
-                         high = "darkred") +
+    geom_text(aes(label = temp_labels, 
+              vjust = label_vjust)) +
 
-    scale_size(range = c(0.5, 3)) +                   
-    labs(
-        x = "Longitude",
-        y = "Temperature (°C)"
+    scale_color_gradient(low = "darkblue", 
+                         high = "darkred", 
+                         guide = "none") +
+
+    scale_size(range = c(0.5, 3), 
+               guide = "none") +
+
+    geom_vline(aes(xintercept = long), 
+               color = "grey60", 
+               linetype = "dashed", 
+               size = 0.3) +
+
+    scale_x_continuous(
+        name = "Longitude",
+        sec.axis = sec_axis(
+            trans = ~.,
+            breaks = temperatures$long,
+            labels = temperatures$month_day
+        ),
+        limits = c(min(troops$long), max(troops$long))
     ) +
 
-    guides(color = FALSE, size = FALSE) +
+    labs(y = "Temperature (°C)") +
+
     theme_minimal() +
     theme(
-        plot.margin = margin(0, 1, 1, 1, 'cm'))
+        plot.margin = margin(0, 1, 1, 1, 'cm'),
+        axis.ticks.x = element_blank(),
+        axis.text.x.top = element_text(angle = 90, vjust = 0.5),
+        panel.grid.major.y = element_line(color = "grey80"),
+        panel.grid.major.x = element_blank(),
+        panel.grid.minor = element_blank()
+    )
 
 temps_plot
 ```
@@ -655,7 +694,3 @@ grid.rect(
               lwd = 1)
 )
 ```
-
-#### Missing Parts
-
-Parts left out that would make this stand out better include mapping the longitude gridlines from the temperature plot all the way up through the movements plot, which is a theme mapping componenet that I tried to mess with, ultimately failed in doing it. I also left out adding the dates and better labeling the temperature points.
