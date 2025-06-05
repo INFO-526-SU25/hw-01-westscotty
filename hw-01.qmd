@@ -559,6 +559,8 @@ The next object was the `geom_point`, with which I was able to set the data to u
 
 The last half of the code section for the movement plot is themes, scales, and labels. It was necessary to adjust the size scaling of the lines for the troops with `scale_size` to have them only grow and shrink to a mapping of 1-10 instead of the values of the data (which is a large number for scaling a line thickness). Then I map the colors specifically to tan and black with `scale_colour_manual`. Only the y-axis label gets a label, since the temperature plot below will have a x-axis label for the longitude. The gridlines are turned off for this plot (with an attempt made to use the longitude lines from the temperatures). In order to plot the 2 parts of this overall map together, I played with the margin an set the bottom margin to 0, to allow the 2 plots to stitch together nicely.
 
+After much time and exploring through the lecture videos more, I figured out that I could use a `geom_vline` to add a vertical component that I can add to both independent plots. I also learned that the vertical adjustment of text is like any other variable, and it can be modified at will, as I did with mutating and creating a new field based on the temperature case.
+
 ```{r napoleon_movement_plot, fig.width=8.5, fig.height=4.5}
 movements_plot <- ggplot() +
 
@@ -609,9 +611,7 @@ movements_plot
 
 #### Temperatures Plot
 
-The temperature plot uses one overall aesthetic mapping based on the temperature data, mapping longitude versus temperature. I used the `geom_path` to create the temperature similarly to the movements plot, that way I can have the lines map to a color gradient for the temperature differences as well as have the lines grow in thickness as the temperature grows. I managed to plot the temperature values along the line using the `geom_text` function again, I needed to add the date as well, to do that I would need to create multiple aesthetic mappings as was done in the movements plot in order to utilize multiple dataframes. I adjusted the top margin on this plot to stitch below the movement plot.
-
-After much time and exploring through the lecture videos more, I figured out that I could use a `geom_vline` to add a vertical component that I can add to both independent plots. I also learned that the vertical adjustment of text is like any other variable, and it can be modified at will, as I did with mutating and creating a new field based on the temperature case.
+The temperature plot uses one overall aesthetic mapping based on the temperature data, mapping longitude versus temperature. I used the `geom_path` to create the temperature similarly to the movements plot, that way I can have the lines map to a color gradient for the temperature differences as well as have the lines grow in thickness as the temperature grows. I managed to plot the temperature values along the line using the `geom_text` function again, I needed to add the date as well, to do that I would need to create multiple aesthetic mappings as was done in the movements plot in order to utilize multiple dataframes. I adjusted the top margin on this plot to stitch below the movement plot. I thought that adding a secondary axis label (top of temperature plot) was appropriate for displaying the dates that in the original plot are merged with the temperature labels along the temperature. I felt that this made the plot look a little cleaner and more organized. Ggplot truly is so customizable, that if you have a random idea, it is probably doable (just like the this second axis labeling).
 
 ```{r napoleon_temp_plot, fig.width=8.5, fig.height=2}
 
