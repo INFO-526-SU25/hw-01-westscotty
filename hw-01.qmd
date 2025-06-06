@@ -561,7 +561,7 @@ The last half of the code section for the movement plot is themes, scales, and l
 
 After much time and exploring through the lecture videos more, I figured out that I could use a `geom_vline` to add a vertical component that I can add to both independent plots. I also learned that the vertical adjustment of text is like any other variable, and it can be modified at will, as I did with mutating and creating a new field based on the temperature case.
 
-```{r napoleon_movement_plot, fig.width=8.5, fig.height=4.5}
+```{r napoleon_movement_plot, fig.width=8.5, fig.height=2.75}
 movements_plot <- ggplot() +
 
     geom_vline(data = temperatures,
@@ -589,6 +589,8 @@ movements_plot <- ggplot() +
               vjust = 1.5) +
 
     scale_size(range = c(1, 10)) +
+    scale_y_continuous(limits = c(53.5, 56)) +
+
     scale_colour_manual(values = c("tan", "darkgrey")) +
     labs(
         title = "Minard's 1812 Recreation",
@@ -679,12 +681,12 @@ temps_plot
 
 Combining the two plots was seamless after adjusting the margins (which took a bit of time to figure out). However, I had to scale the movement plot to take more height that the temperature plot, then ultimately add a border around the plot. Found help on merging plots and making borders [@R-ggplot2], [@R-gridExtra], [@R-grid].
 
-```{r napoleon_combined_plot, fig.width=8.5, fig.height=6.5}
+```{r napoleon_combined_plot, fig.width=8.5, fig.height=4.75}
 combo_plot <- grid.arrange(
     movements_plot,
     temps_plot,
     ncol = 1,
-    heights = c(2.25, 1)
+    heights = c(1.375, 1)
 )
 
 grid.newpage()
